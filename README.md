@@ -9,7 +9,9 @@ Specifically, this showcases a custom agent that automatically generates high-qu
 - Integration tests using testcontainers
 - Modern Python packaging with pyproject.toml
 
-This setup was created in the `grandcloud-oss` organization where I had administrator privileges. **Note: Organization administrator privileges are required** to create the `.github-private` repository and configure organization-level custom agents with MCP server integrations.
+**Important**: This repository contains **example agent configurations and documentation only**. The actual custom agents are deployed in the organization-level `grandcloud-oss/.github-private` repository, where they are available across all repositories in the organization.
+
+This setup was created in the `grandcloud-oss` organization where I had administrator privileges. **Organization administrator privileges are required** to create the `.github-private` repository and configure organization-level custom agents with MCP server integrations.
 
 ## Testing MCP Servers Directly
 
@@ -33,14 +35,17 @@ For more details on custom agents, see:
 
 **IMPORTANT**: If your agent uses MCP servers, it MUST be created at the **organization level** in a **private `.github-private` repository**.
 
-Individual repository-level agents cannot access MCP servers and will not work.
+Individual repository-level agents cannot access MCP servers and will not work. **This repository does not contain the actual agents** - they must be created in your organization's `.github-private` repository.
 
 See the official [GitHub documentation on creating custom agents](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents) for detailed setup instructions.
 
 ### Prerequisites
 
-- **Organization administrator privileges** are required to create and configure the `.github-private` repository
-- Access to organization-level settings for environment variables and secrets
+1. **Create a `.github-private` repository** in your organization first. This is a special private repository that GitHub uses for organization-level configurations. See the [GitHub documentation on adding a member-only organization profile README](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/customizing-your-organizations-profile#adding-a-member-only-organization-profile-readme) for instructions on creating this repository.
+
+2. **Organization administrator privileges** are required to create and configure the `.github-private` repository
+
+3. **Access to organization-level settings** for environment variables and secrets
 
 ### Repository Structure
 
