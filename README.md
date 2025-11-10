@@ -2,6 +2,16 @@
 
 This repository demonstrates how to set up custom GitHub Copilot agents that integrate with Model Context Protocol (MCP) servers.
 
+## Testing MCP Servers Directly
+
+Before creating custom agents, it can be useful to first test the MCP servers directly to ensure they're working correctly. This allows you to verify connectivity and functionality independently from the agent configuration.
+
+See the [GitHub documentation on extending the coding agent with MCP](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/extend-coding-agent-with-mcp) for instructions on how to configure and test MCP servers locally.
+
+This repository includes two example MCP server configurations for Neo4j in [`sample-mcp-config/`](sample-mcp-config/):
+- [`neo4j-mcp-docker-config.json`](sample-mcp-config/neo4j-mcp-docker-config.json) - Docker-based MCP server configuration
+- [`neo4j-mcp-local-config.json`](sample-mcp-config/neo4j-mcp-local-config.json) - Local Python-based MCP server configuration
+
 ## What are Custom GitHub Copilot Agents?
 
 Custom agents extend GitHub Copilot's capabilities by providing specialized tools and domain-specific knowledge. They can be configured to use external tools, APIs, and MCP servers to perform complex tasks beyond standard code completion.
@@ -31,56 +41,17 @@ Your organization should have:
 
 This repository includes two example agents that demonstrate different approaches to running MCP servers:
 
-### 1. Docker-Based Agent (`neo4j-docker-client-generator.md`)
+### 1. Docker-Based Agent
 
-Located in `org-setup-files/agents/neo4j-docker-client-generator.md`
+See [`org-setup-files/agents/neo4j-docker-client-generator.md`](org-setup-files/agents/neo4j-docker-client-generator.md)
 
-This agent runs the MCP server inside a Docker container:
+This agent runs the MCP server inside a Docker container.
 
-```yaml
-mcp-servers:
-  neo4j-local:
-    type: 'local'
-    command: 'docker'
-    args: [
-      'run',
-      '-i',
-      '--rm',
-      '-e', 'NEO4J_URI',
-      '-e', 'NEO4J_USERNAME',
-      '-e', 'NEO4J_PASSWORD',
-      '-e', 'NEO4J_DATABASE',
-      '-e', 'NEO4J_NAMESPACE=neo4j-local',
-      '-e', 'NEO4J_TRANSPORT=stdio',
-      'mcp/neo4j-cypher:latest'
-    ]
-    env:
-      NEO4J_URI: '${COPILOT_MCP_NEO4J_URI}'
-      NEO4J_USERNAME: '${COPILOT_MCP_NEO4J_USERNAME}'
-      NEO4J_PASSWORD: '${COPILOT_MCP_NEO4J_PASSWORD}'
-      NEO4J_DATABASE: '${COPILOT_MCP_NEO4J_DATABASE}'
-    tools: ["*"]
-```
+### 2. Python Direct Agent
 
-### 2. Python Direct Agent (`neo4j-local-client-generator.md`)
+See [`org-setup-files/agents/neo4j-local-client-generator.md`](org-setup-files/agents/neo4j-local-client-generator.md)
 
-Located in `org-setup-files/agents/neo4j-local-client-generator.md`
-
-This agent runs the MCP server directly as a Python command:
-
-```yaml
-mcp-servers:
-  neo4j-python:
-    type: 'local'
-    command: 'mcp-neo4j-cypher'
-    args: ['--transport', 'stdio', '--namespace', 'neo4j-python']
-    env:
-      NEO4J_URI: '${COPILOT_MCP_NEO4J_URI}'
-      NEO4J_USERNAME: '${COPILOT_MCP_NEO4J_USERNAME}'
-      NEO4J_PASSWORD: '${COPILOT_MCP_NEO4J_PASSWORD}'
-      NEO4J_DATABASE: '${COPILOT_MCP_NEO4J_DATABASE}'
-    tools: ["*"]
-```
+This agent runs the MCP server directly as a Python command.
 
 ### Agent File Layout
 
@@ -133,43 +104,39 @@ Also create the same environment variables at the repository level:
 
 The Python-based agent requires a GitHub Actions workflow to set up the Python environment. This is critical for agents that run MCP servers directly.
 
-Create `.github/workflows/copilot-setup-steps.yml`:
-
-```yaml
-name: "Copilot Setup Steps"
-
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - .github/workflows/copilot-setup-steps.yml
-
-jobs:
-  copilot-setup-steps:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install mcp-neo4j-cypher with pip
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install mcp-neo4j-cypher
-
-      - name: Verify mcp-neo4j-cypher installation
-        run: |
-          which mcp-neo4j-cypher
-          mcp-neo4j-cypher --help || echo "mcp-neo4j-cypher installed"
-```
+See [`.github/workflows/copilot-setup-steps.yml`](.github/workflows/copilot-setup-steps.yml) for the workflow configuration.
 
 This workflow ensures that the Python environment and required MCP server packages are available when Copilot agents execute.
+
+## Testing Your Custom Agent
+
+Once your agent is configured, follow these steps to test it:
+
+### 1. Create and Assign an Issue to Copilot
+
+Create a new issue in your repository and assign it to Copilot.
+
+**Important**: You must click away from the assignment dropdown after assigning to Copilot, then return to set the custom agent. The custom agent selection will not be available until you click out first.
+
+![Assigning custom agent to issue](images/custom-agent.png)
+
+### 2. Monitor Agent Startup
+
+Give the agent a couple of minutes to start up. Once it begins, you'll see "Copilot started work on..." in the issue comments. Click on that link to see the status and logs.
+
+![Finding custom agent logs](images/find-custom-agent-logs.png)
+
+### 3. Verify MCP Server Connection
+
+Once started, you'll see the agent connect to Neo4j and retrieve the schema, confirming that the MCP server integration is working correctly.
+
+![Custom agent logs showing Neo4j connection](images/custom-agent-logs.png)
+
+### 4. View Detailed Debug Logs
+
+You can go to the Actions tab in your repository to see detailed debug logs for each agent run.
+
+![Custom agent debug logs in Actions](images/custom-agent-debug-logs.png)
 
 ## Summary Checklist
 
