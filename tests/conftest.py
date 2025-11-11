@@ -9,7 +9,7 @@ from airplane_client import Neo4jConnection
 @pytest.fixture(scope="session")
 def neo4j_container():
     """Session-scoped Neo4j container fixture."""
-    with Neo4jContainer("neo4j:5.13") as container:
+    with Neo4jContainer("neo4j:5.13", password="testpassword") as container:
         yield container
 
 
@@ -24,7 +24,7 @@ def neo4j_connection(neo4j_container):
     """Function-scoped Neo4j connection fixture."""
     uri = neo4j_container.get_connection_url()
     username = "neo4j"
-    password = "test"
+    password = "testpassword"
     
     connection = Neo4jConnection(uri, username, password)
     connection.connect()
