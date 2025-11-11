@@ -9,7 +9,8 @@ from neo4j_client import Neo4jConnection
 @pytest.fixture(scope="session")
 def neo4j_container():
     """Provide a Neo4j container for testing."""
-    container = Neo4jContainer("neo4j:5.15")
+    # Create container with password
+    container = Neo4jContainer("neo4j:5.15", password="test12345678")
     container.start()
     yield container
     container.stop()
